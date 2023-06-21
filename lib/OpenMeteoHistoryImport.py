@@ -32,7 +32,7 @@ class OpenMeteoHistoryImport:
         self.__lat = self.__lib.get_config("lat", 51.34)
         self.__long = self.__lib.get_config("long", 12.38)
         self.__start_date = self.__lib.get_config('start', str(self.__now - timedelta(days=365)))
-        self.__end_date = self.__lib.get_config('end', str(self.__now - timedelta(days=6)))
+        self.__end_date = str(self.__now - timedelta(days=6))
         self.__past_days = 6
         self.__forecast_days = 1
         self.import_current()
