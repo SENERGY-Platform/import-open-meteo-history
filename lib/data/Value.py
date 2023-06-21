@@ -32,8 +32,7 @@ class Value(object):
                  direct_radiation: float,
                  diffuse_radiation: float,
                  windspeed_10m: float,
-                 winddirection_10m: float,
-                 weathercode: float):
+                 winddirection_10m: float):
         self.weather_time = weather_time
         self.temperature_2m = temperature_2m
         self.relativehumidity_2m = relativehumidity_2m
@@ -48,7 +47,6 @@ class Value(object):
         self.diffuse_radiation = diffuse_radiation
         self.windspeed_10m = windspeed_10m
         self.winddirection_10m = winddirection_10m
-        self.weathercode = weathercode
 
     def dict(self, units: Units) -> dict:
         d = {
@@ -66,7 +64,6 @@ class Value(object):
             "diffuse_radiation": self.diffuse_radiation,
             "windspeed_10m": self.windspeed_10m,
             "winddirection_10m": self.winddirection_10m,
-            "weathercode": self.weathercode,
             "units": units.dict(),
         }
         return d

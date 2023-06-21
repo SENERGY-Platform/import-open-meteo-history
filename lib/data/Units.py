@@ -28,8 +28,7 @@ class Units(object):
                  direct_radiation: str,
                  diffuse_radiation: str,
                  windspeed_10m: str,
-                 winddirection_10m: str,
-                 weathercode: str):
+                 winddirection_10m: str):
         self.temperature_2m = temperature_2m
         self.relativehumidity_2m = relativehumidity_2m
         self.pressure_msl = pressure_msl
@@ -43,7 +42,6 @@ class Units(object):
         self.diffuse_radiation = diffuse_radiation
         self.windspeed_10m = windspeed_10m
         self.winddirection_10m = winddirection_10m
-        self.weathercode = weathercode
 
     def dict(self) -> dict:
         d = {
@@ -59,7 +57,6 @@ class Units(object):
             "direct_radiation": self.direct_radiation,
             "diffuse_radiation": self.diffuse_radiation,
             "windspeed_10m": self.windspeed_10m,
-            "winddirection_10m": self.winddirection_10m,
-            "weathercode": self.weathercode
+            "winddirection_10m": self.winddirection_10m
         }
         return d

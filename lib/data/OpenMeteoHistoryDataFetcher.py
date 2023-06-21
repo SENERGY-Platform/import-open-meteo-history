@@ -51,8 +51,7 @@ def get_data(lat: float, long: float, start_date: str, end_date: str) -> Tuple[d
                         'direct_radiation',
                         'diffuse_radiation',
                         'windspeed_10m',
-                        'winddirection_10m',
-                        'weathercode']}
+                        'winddirection_10m']}
     r = requests.get(url, params = params)
     if not r.ok:
         raise RuntimeError("Error contacting Open-Meteo Api")
@@ -74,8 +73,7 @@ def get_data(lat: float, long: float, start_date: str, end_date: str) -> Tuple[d
         direct_radiation=extract(api_units, 'direct_radiation'),
         diffuse_radiation=extract(api_units, 'diffuse_radiation'),
         windspeed_10m=extract(api_units, 'windspeed_10m'),
-        winddirection_10m=extract(api_units, 'winddirection_10m'),
-        weathercode=extract(api_units, 'weathercode')
+        winddirection_10m=extract(api_units, 'winddirection_10m')
     )
     values: List[Tuple[datetime, Value]] = []
     if 'hourly' not in j or 'time' not in j['hourly']:
@@ -99,7 +97,6 @@ def get_data(lat: float, long: float, start_date: str, end_date: str) -> Tuple[d
             direct_radiation=j['hourly']['direct_radiation'][i],
             diffuse_radiation=j['hourly']['diffuse_radiation'][i],
             windspeed_10m=j['hourly']['windspeed_10m'][i],
-            winddirection_10m=j['hourly']['winddirection_10m'][i],
-            weathercode=j['hourly']['weathercode'][i]
+            winddirection_10m=j['hourly']['winddirection_10m'][i]
         )))
     return units, values
