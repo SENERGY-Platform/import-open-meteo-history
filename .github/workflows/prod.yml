@@ -35,5 +35,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            smartenergyplatform/import-yr-forecast:prod
-            ghcr.io/senergy-platform/import-yr-forecast:prod
+            smartenergyplatform/open-meteo-history-import:prod
+            ghcr.io/senergy-platform/open-meteo-history-import:prod
