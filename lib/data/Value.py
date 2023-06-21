@@ -19,6 +19,7 @@ from lib.data.Units import Units
 class Value(object):
 
     def __init__(self,
+                 weather_time: str,
                  temperature_2m: float,
                  relativehumidity_2m: float,
                  pressure_msl: float,
@@ -33,6 +34,7 @@ class Value(object):
                  windspeed_10m: float,
                  winddirection_10m: float,
                  weathercode: float):
+        self.weather_time = weather_time
         self.temperature_2m = temperature_2m
         self.relativehumidity_2m = relativehumidity_2m
         self.pressure_msl = pressure_msl
@@ -50,6 +52,7 @@ class Value(object):
 
     def dict(self, units: Units) -> dict:
         d = {
+            "weather_time": self.weather_time,
             "temperature_2m": self.temperature_2m,
             "relativehumidity_2m": self.relativehumidity_2m,
             "pressure_msl": self.pressure_msl,
