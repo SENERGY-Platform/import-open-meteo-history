@@ -38,16 +38,12 @@ class OpenMeteoHistoryImport:
         self.import_current()
 
     def import_current(self):
-        units_archive, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, self.__end_date)
-        units_past_days_forecast, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
-        if units_archive != units_past_days_forecast:
-            raise RuntimeError("Error: Invalid Open-Meteo Response")
-        else:
-            all_units = units_archive
+        units, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, self.__end_date)
+        _, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
         all_values = values_archive + values_past_days_forecast
         for t, v in all_values:
-            self.__lib.put(t, v.dict(all_units))
-            logger.debug(json.dumps(v.dict(all_units)))
+            self.__lib.put(t, v.dict(units))
+            logger.debug(json.dumps(v.dict(units)))
         logger.info("Imported " + str(len(all_values)) + " values")
         logger.info("Scheduling next run for " + str(self.__now + timedelta(days=1)))
         self.__scheduler.enterabs(self.__now + timedelta(days=1), 1, self.import_current)
