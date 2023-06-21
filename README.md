@@ -1,7 +1,8 @@
-# import-yr-forecast
+# import-open-meteo-history
 
-Imports weather forecast from MET Norway (known for their forecast service yr).
+Imports weather history data from Open-Meteo.
 
+<!---
 ## Outputs
 * forecasted_for (string): timestamp of forecast in rfc3339
 * instant_air_pressure_at_sea_level (float)
@@ -60,3 +61,5 @@ Imports weather forecast from MET Norway (known for their forecast service yr).
 This tool uses publicly available data provided by the Norwegian Meteorological Institute released 
 under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 Their forecasts are available [here](https://www.yr.no/en).
+
+-->
