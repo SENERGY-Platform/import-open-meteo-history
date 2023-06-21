@@ -41,7 +41,7 @@ class OpenMeteoHistoryImport:
         units_archive, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, self.__end_date)
         units_past_days_forecast, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
         if units_archive != units_past_days_forecast:
-            RuntimeError("Error: Invalid Open-Meteo Response")
+            raise RuntimeError("Error: Invalid Open-Meteo Response")
         else:
             all_units = units_archive
         all_values = values_archive + values_past_days_forecast
