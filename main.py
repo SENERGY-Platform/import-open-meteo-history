@@ -22,7 +22,7 @@ from lib.OpenMeteoHistoryImport import OpenMeteoHistoryImport
 if __name__ == '__main__':
     lib = ImportLib()
     logger = get_logger(__name__)
-    scheduler = sched.scheduler()
+    scheduler = sched.scheduler(timefunc=time.time)
     weather_history_import = OpenMeteoHistoryImport(lib, scheduler)
 
     while True:
