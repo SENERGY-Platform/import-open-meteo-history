@@ -14,7 +14,7 @@
 
 import sched
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 from import_lib.import_lib import get_logger, ImportLib
 
@@ -46,4 +46,4 @@ class OpenMeteoHistoryImport:
             logger.debug(json.dumps(v.dict(units)))
         logger.info("Imported " + str(len(all_values)) + " values")
         logger.info("Scheduling next run for " + str(self.__now + timedelta(days=1)))
-        self.__scheduler.enterabs((self.__now + timedelta(days=1)).timestamp(), 1, self.import_current)
+        self.__scheduler.enterabs(datetime.combine(self.__now + timedelta(days=1), time.min).timestamp(), 1, self.import_current)
