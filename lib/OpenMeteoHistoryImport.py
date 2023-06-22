@@ -28,11 +28,10 @@ class OpenMeteoHistoryImport:
     def __init__(self, lib: ImportLib, scheduler: sched.scheduler):
         self.__lib = lib
         self.__scheduler = scheduler
-        self.__now = datetime.now().date()
         self.__lat = self.__lib.get_config("lat", 51.34)
         self.__long = self.__lib.get_config("long", 12.38)
-        self.__start_date = self.__lib.get_config('start', str(self.__now - timedelta(days=365)))
-        self.__end_date = str(self.__now - timedelta(days=6))
+        self.__start_date = self.__lib.get_config('start', str(datetime.now().date() - timedelta(days=365)))
+        self.__end_date = str(datetime.now().date() - timedelta(days=6))
         self.__past_days = 6
         self.__forecast_days = 1
         self.import_current()
@@ -45,5 +44,5 @@ class OpenMeteoHistoryImport:
             self.__lib.put(t, v.dict(units))
             logger.debug(json.dumps(v.dict(units)))
         logger.info("Imported " + str(len(all_values)) + " values")
-        logger.info("Scheduling next run for " + str(self.__now + timedelta(days=1)))
-        self.__scheduler.enterabs(datetime.combine(self.__now + timedelta(days=1), time.min).timestamp(), 1, self.import_current)
+        logger.info("Scheduling next run for " + str(datetime.now().date() + timedelta(days=1)))
+        self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), time.min).timestamp(), 1, self.import_current)
