@@ -31,13 +31,13 @@ class OpenMeteoHistoryImport:
         self.__lat = self.__lib.get_config("lat", 51.34)
         self.__long = self.__lib.get_config("long", 12.38)
         self.__start_date = self.__lib.get_config('start', str(datetime.now().date() - timedelta(days=365)))
-        self.__end_date = str(datetime.now().date() - timedelta(days=6))
         self.__past_days = 6
         self.__forecast_days = 1
         self.import_current()
 
     def import_current(self):
-        units, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, self.__end_date)
+        end_date = str(datetime.now().date() - timedelta(days=6))
+        units, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, end_date)
         _, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
         all_values = values_archive + values_past_days_forecast
         for t, v in all_values:
