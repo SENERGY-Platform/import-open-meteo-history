@@ -20,7 +20,7 @@ from import_lib.import_lib import ImportLib, get_logger
 from lib.OpenMeteoHistoryImport import OpenMeteoHistoryImport
 
 if __name__ == '__main__':
-    lib = ImportLib()
+    lib = ImportLib("github.com/SENERGY-Platform/import-open-meteo-history")
     logger = get_logger(__name__)
     scheduler = sched.scheduler(timefunc=time.time)
     weather_history_import = OpenMeteoHistoryImport(lib, scheduler)
