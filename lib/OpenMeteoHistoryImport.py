@@ -14,7 +14,10 @@
 
 import sched
 import json
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
+
+import requests
+import time
 
 from import_lib.import_lib import get_logger, ImportLib
 
@@ -33,7 +36,30 @@ class OpenMeteoHistoryImport:
         self.__start_date = self.__lib.get_config('start', str(datetime.now().date() - timedelta(days=365)))
         self.__past_days = 6
         self.__forecast_days = 1
-        self.import_current()
+        self.import_current_with_retry()
+
+    def import_current_with_retry(self, max_attempts: int = 5, base_sleep: float = 2.0) -> bool:
+        for attempt in range(1, max_attempts + 1):
+            try:
+                self.import_current()
+                return True
+
+            except requests.exceptions.ConnectionError as e:
+                print(f"Open-Meteo-Verbindungsfehler, Versuch {attempt}/{max_attempts}: {e}")
+
+            except requests.exceptions.Timeout as e:
+                print(f"Open-Meteo-Timeout, Versuch {attempt}/{max_attempts}: {e}")
+
+            except requests.exceptions.HTTPError as e:
+                print(f"Open-Meteo-HTTP-Fehler, kein weiterer Retry: {e}")
+                return False
+
+            if attempt < max_attempts:
+                sleep_seconds = base_sleep * attempt
+                time.sleep(sleep_seconds)
+
+        print("Open-Meteo-Import nach mehreren Versuchen fehlgeschlagen. App läuft weiter.")
+        return False
 
     def import_current(self):
         end_date = str(datetime.now().date() - timedelta(days=6))
@@ -45,4 +71,4 @@ class OpenMeteoHistoryImport:
             logger.debug(json.dumps(v.dict(units)))
         logger.info("Imported " + str(len(all_values)) + " values")
         logger.info("Scheduling next run for " + str(datetime.now().date() + timedelta(days=1)))
-        self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), time.min).timestamp(), 1, self.import_current)
+        self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), datetime.min.time()).timestamp(), 1, self.import_current)
