@@ -71,4 +71,4 @@ class OpenMeteoHistoryImport:
             logger.debug(json.dumps(v.dict(units)))
         logger.info("Imported " + str(len(all_values)) + " values")
         logger.info("Scheduling next run for " + str(datetime.now().date() + timedelta(days=1)))
-        self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), datetime.min.time()).timestamp(), 1, self.import_current)
+        self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), datetime.min.time()).timestamp(), 1, self.import_current_with_retry)
