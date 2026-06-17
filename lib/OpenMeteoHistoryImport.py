@@ -45,26 +45,39 @@ class OpenMeteoHistoryImport:
                 return True
 
             except requests.exceptions.ConnectionError as e:
-                print(f"Open-Meteo-Verbindungsfehler, Versuch {attempt}/{max_attempts}: {e}")
+                logger.info(f"Open-Meteo-Verbindungsfehler, Versuch {attempt}/{max_attempts}: {e}")
 
             except requests.exceptions.Timeout as e:
-                print(f"Open-Meteo-Timeout, Versuch {attempt}/{max_attempts}: {e}")
+                logger.info(f"Open-Meteo-Timeout, Versuch {attempt}/{max_attempts}: {e}")
 
             except requests.exceptions.HTTPError as e:
-                print(f"Open-Meteo-HTTP-Fehler, kein weiterer Retry: {e}")
+                logger.info(f"Open-Meteo-HTTP-Fehler, kein weiterer Retry: {e}")
                 return False
 
             if attempt < max_attempts:
                 sleep_seconds = base_sleep * attempt
                 time.sleep(sleep_seconds)
 
-        print("Open-Meteo-Import nach mehreren Versuchen fehlgeschlagen. App läuft weiter.")
+        logger.info("Open-Meteo-Import nach mehreren Versuchen fehlgeschlagen. App läuft weiter.")
         return False
 
     def import_current(self):
+        logger.info("Open-Meteo import_current started")
+
         end_date = str(datetime.now().date() - timedelta(days=6))
+
+        logger.info(f"Fetching archive data from {self.__start_date} to {end_date}")
         units, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, end_date)
+
+        logger.info(f"Fetched archive data: {len(values_archive)} values")
+
+        logger.info(
+        f"Fetching past-days forecast: past_days={self.__past_days}, "
+        f"forecast_days={self.__forecast_days}"
+        )
         _, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
+        logger.info(f"Fetched past-days forecast: {len(values_past_days_forecast)} values")
+        
         all_values = values_archive + values_past_days_forecast
         for t, v in all_values:
             self.__lib.put(t, v.dict(units))
