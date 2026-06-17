@@ -16,6 +16,9 @@ from datetime import datetime
 from typing import Tuple, List, Optional
 
 import requests
+import socket
+import urllib3.util.connection as urllib3_connection
+
 from import_lib.import_lib import get_logger
 
 from lib.data.Units import Units
@@ -26,6 +29,9 @@ OPEN_METEO_BASE_URL = "https://api.open-meteo.com"
 OPEN_METEO_FORECAST_URL = OPEN_METEO_BASE_URL + "/v1/forecast"
 
 logger = get_logger(__name__)
+
+def allowed_gai_family():
+    return socket.AF_INET
 
 
 def get_data(lat: float, long: float, past_days: int, forecast_days: int) -> Tuple[datetime, datetime, Optional[Units], List[Tuple[datetime, Value]]]:
@@ -53,6 +59,9 @@ def get_data(lat: float, long: float, past_days: int, forecast_days: int) -> Tup
                         'diffuse_radiation',
                         'windspeed_10m',
                         'winddirection_10m']}
+    
+    urllib3_connection.allowed_gai_family = allowed_gai_family
+
     r = requests.get(url, params = params)
     if not r.ok:
         raise RuntimeError("Error contacting Open-Meteo Api")
