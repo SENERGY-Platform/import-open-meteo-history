@@ -93,7 +93,7 @@ def get_data(lat: float, long: float, past_days: int, forecast_days: int) -> Tup
             raise RuntimeError('Error: Invalid Open-Meteo Response')
 
     for i, time in enumerate(j['hourly']['time']):
-        values.append((datetime.now(), Value(
+        values.append((time, Value(
             weather_time=time,
             temperature_2m=j['hourly']['temperature_2m'][i],
             relativehumidity_2m=j['hourly']['relativehumidity_2m'][i],
