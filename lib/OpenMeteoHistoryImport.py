@@ -14,7 +14,8 @@
 
 import sched
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
+from typing import Optional
 
 import requests
 import time
@@ -22,7 +23,6 @@ import time
 from import_lib.import_lib import get_logger, ImportLib
 
 from lib.data.OpenMeteoHistoryDataFetcher import get_data as get_data_archive
-from lib.data.OpenMeteoPastDaysForecastingDataFetcher import get_data as get_data_past_days_forecast
 
 logger = get_logger(__name__)
 
@@ -33,10 +33,19 @@ class OpenMeteoHistoryImport:
         self.__scheduler = scheduler
         self.__lat = self.__lib.get_config("lat", 51.34)
         self.__long = self.__lib.get_config("long", 12.38)
-        self.__start_date = self.__lib.get_config('start', str(datetime.now().date() - timedelta(days=365)))
-        self.__past_days = 6
-        self.__forecast_days = 1
+        self.__start_date = date.fromisoformat(str(self.__lib.get_config('start', str(datetime.now().date() - timedelta(days=365))))[:10])
         self.import_current_with_retry()
+
+    def __read_watermark(self) -> Optional[datetime]:
+        last, message = self.__lib.get_last_published_datetime()
+        if last is None:
+            return None
+        if not message:
+            # import-lib answers with the epoch and an empty message when it cannot read the last message. Going on
+            # would import everything since start again.
+            raise RuntimeError("Could not read the last published message")
+        # import-lib parses the time of the last message into a naive datetime in UTC
+        return last.replace(tzinfo=timezone.utc) if last.tzinfo is None else last
 
     def import_current_with_retry(self, max_attempts: int = 5, base_sleep: float = 2.0) -> bool:
         for attempt in range(1, max_attempts + 1):
@@ -64,24 +73,27 @@ class OpenMeteoHistoryImport:
     def import_current(self):
         logger.info("Open-Meteo import_current started")
 
-        end_date = str(datetime.now().date() - timedelta(days=6))
+        # Read at every run, so that messages that were queued but never delivered are imported again
+        watermark = self.__read_watermark()
+        start_date = self.__start_date
+        if watermark is not None:
+            # The archive is queried by local date of the location, which can lie a day before the UTC date
+            start_date = max(start_date, watermark.date() - timedelta(days=1))
+        end_date = datetime.now().date() - timedelta(days=6)
 
-        logger.info(f"Fetching archive data from {self.__start_date} to {end_date}")
-        units, values_archive = get_data_archive(self.__lat, self.__long, self.__start_date, end_date)
-
-        logger.info(f"Fetched archive data: {len(values_archive)} values")
-
-        logger.info(
-        f"Fetching past-days forecast: past_days={self.__past_days}, "
-        f"forecast_days={self.__forecast_days}"
-        )
-        _, values_past_days_forecast = get_data_past_days_forecast(self.__lat, self.__long, self.__past_days, self.__forecast_days)
-        logger.info(f"Fetched past-days forecast: {len(values_past_days_forecast)} values")
-        
-        all_values = values_archive + values_past_days_forecast
-        for t, v in all_values:
-            self.__lib.put(t, v.dict(units))
-            logger.debug(json.dumps(v.dict(units)))
-        logger.info("Imported " + str(len(all_values)) + " values")
+        imported = 0
+        if start_date <= end_date:
+            logger.info(f"Fetching archive data from {start_date} to {end_date}")
+            units, values = get_data_archive(self.__lat, self.__long, str(start_date), str(end_date))
+            logger.info(f"Fetched archive data: {len(values)} values")
+            for t, v in values:
+                if watermark is not None and t <= watermark:
+                    continue
+                self.__lib.put(t, v.dict(units))
+                logger.debug(json.dumps(v.dict(units)))
+                imported += 1
+        else:
+            logger.info(f"Skipping archive data, start {start_date} is after {end_date}")
+        logger.info("Imported " + str(imported) + " values")
         logger.info("Scheduling next run for " + str(datetime.now().date() + timedelta(days=1)))
         self.__scheduler.enterabs(datetime.combine(datetime.now().date() + timedelta(days=1), datetime.min.time()).timestamp(), 1, self.import_current_with_retry)
