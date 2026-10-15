@@ -1,3 +1,6 @@
 git+https://github.com/SENERGY-Platform/import-lib.git@0.3.0
+# librdkafka-dev from Alpine edge is 2.15.1; confluent_kafka has no musl wheels and
+# compiles against it, and 2.16.0 refuses to build against an older librdkafka.
+confluent_kafka==2.15.1
 requests
 rfc3339
