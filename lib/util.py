@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import time
 from typing import Optional
 
@@ -23,6 +23,11 @@ def datetime_to_http(dt: datetime) -> str:
 
 def http_to_datetime(s: str) -> datetime:
     return datetime.strptime(s, '%a, %d %b %Y %H:%M:%S GMT').replace(tzinfo=timezone.utc)
+
+
+def open_meteo_to_datetime(s: str, utc_offset_seconds: int) -> datetime:
+    # Open-Meteo shifts every timestamp of a response by the same utc_offset_seconds, also across DST changes
+    return datetime.fromisoformat(s).replace(tzinfo=timezone(timedelta(seconds=utc_offset_seconds))).astimezone(timezone.utc)
 
 
 def extract(d: dict, path: str) -> Optional[any]:

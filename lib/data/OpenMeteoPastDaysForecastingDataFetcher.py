@@ -23,7 +23,7 @@ from import_lib.import_lib import get_logger
 
 from lib.data.Units import Units
 from lib.data.Value import Value
-from lib.util import extract
+from lib.util import extract, open_meteo_to_datetime
 
 OPEN_METEO_BASE_URL = "https://api.open-meteo.com"
 OPEN_METEO_FORECAST_URL = OPEN_METEO_BASE_URL + "/v1/forecast"
@@ -86,14 +86,14 @@ def get_data(lat: float, long: float, past_days: int, forecast_days: int) -> Tup
         winddirection_10m=extract(api_units, 'winddirection_10m')
     )
     values: List[Tuple[datetime, Value]] = []
-    if 'hourly' not in j or 'time' not in j['hourly']:
+    if 'hourly' not in j or 'time' not in j['hourly'] or 'utc_offset_seconds' not in j:
         raise RuntimeError("Error: Invalid Open-Meteo Response")
     for value_type in j['hourly']:
         if len(j['hourly'][value_type]) != len(j['hourly']['time']):
             raise RuntimeError('Error: Invalid Open-Meteo Response')
 
     for i, time in enumerate(j['hourly']['time']):
-        values.append((time, Value(
+        values.append((open_meteo_to_datetime(time, j['utc_offset_seconds']), Value(
             weather_time=time,
             temperature_2m=j['hourly']['temperature_2m'][i],
             relativehumidity_2m=j['hourly']['relativehumidity_2m'][i],
